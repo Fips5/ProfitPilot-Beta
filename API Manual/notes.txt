@@ -1,0 +1,5 @@
+to install pkgs use  # npm i cheerio
+                    you can also type # npm install cheerio #and it will do the same 
+you can also in
+
+https://www.twitch.tv/badea695

@@ -1,0 +1,24 @@
+from PIL import Image
+import pytesseract
+import cv2
+import pyautogui
+
+def tesseract():
+    path_to_tesseract = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
+    pytesseract.pytesseract.tesseract_cmd = path_to_tesseract
+    custom_config = r'--psm 6 outputbase digits'
+
+    # Capture a screenshot of the entire screen
+    screenshot = pyautogui.screenshot()
+
+    # Save the screenshot as 'screenshot.png'
+    screenshot.save('screenshot.png')
+
+    # Perform OCR on the screenshot
+    text = pytesseract.image_to_string(Image.open('screenshot.png'), config=custom_config)
+    print(text[:-1])
+
+tesseract()
+
+
+

@@ -1,0 +1,83 @@
+onst PORT = process.env.PORT || 8000;
+const express = require('express');
+const axios = require('axios');
+const cheerio = require('cheerio');
+const fs = require('fs');
+
+const app = express();
+
+function calculateSMA(prices, period) {
+  if (prices.length < period) {
+    return 0; // Set SMA to 0 if there isn't enough data
+  }
+
+  const sum = prices.slice(0, period).reduce((total, price) => total + price, 0);
+  return sum / period;
+}
+
+async function getPriceFeed() {
+  try {
+    const siteUrl = 'https://www.google.com/finance/quote/TSLA:NASDAQ';
+    const data = await axios.get(siteUrl);
+    const $ = cheerio.load(data.data);
+
+    const elemSelector =
+      '#yDmH0d > c-wiz > div > div.e1AOyf > div > main > div.Gfxi4 > div.VfPpkd-WsjYwc.VfPpkd-WsjYwc-OWXEXe-INsAgc.KC1dQ.Usd1Ac.AaN0Dd.QZMA8b > c-wiz > div > div:nth-child(1) > div > div.rPF6Lc > div > div:nth-child(1) > div > span > div > div';
+
+    const timestamp = new Date().toLocaleString();
+
+    const prices = [];
+    const sma5s = [];
+    const sma20s = [];
+
+    $(elemSelector).each((parentIdx, parentElem) => {
+      const price = $(parentElem).text().replace('$', '').replace(',', '').trim();
+      console.log('Timestamp:', timestamp);
+      console.log('Price:', price);
+      prices.push(parseFloat(price));
+
+      const sma5 = calculateSMA(prices, 5);
+      const sma20 = calculateSMA(prices, 20);
+
+      sma5s.push(sma5);
+      sma20s.push(sma20);
+    });
+
+    const dataToSave = {
+      symbol: 'TSLA',
+      prices,
+      sma5: sma5s[sma5s.length - 1],
+      sma20: sma20s[sma20s.length - 1],
+      timestamp: new Date().toLocaleString(),
+    };
+
+    fs.writeFile('price_data.json', JSON.stringify(dataToSave) + '\n', 'utf8', (err) => {
+      if (err) {
+        console.error('Error writing JSON file:', err);
+      }
+    });
+  } catch (err) {
+    console.error(err);
+  }
+}
+
+setInterval(getPriceFeed, 1000);
+
+app.get('/', (req, res) => {
+  fs.readFile('price_data.json', 'utf8', (err, data) => {
+    if (err) {
+      console.error('Error reading JSON file:', err);
+      return res.status(500).send('Internal Server Error');
+    }
+
+    try {
+      const jsonData = JSON.parse(data);
+      res.json(jsonData);
+    } catch (err) {
+      console.error('Error parsing JSON:', err);
+      return res.status(500).send('Internal Server Error');
+    }
+  });
+});
+
+app.listen(PORT, () => console.log(`Server running on PORT: ${PORT}`));

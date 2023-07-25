@@ -1,0 +1,27 @@
+import pyautogui
+import time
+
+def buy():
+    pyautogui.hotkey('win', 'r')
+    pyautogui.typewrite(r'C:/Users/David/Desktop/DAVID - Chrome.lnk')
+    pyautogui.press('enter')
+    time.sleep(2)
+
+    pyautogui.hotkey('ctrl', 'l')
+
+    pyautogui.typewrite('https://www.etoro.com/markets/tsla')
+    pyautogui.press('enter')
+
+    pyautogui.hotkey('alt', 'space')
+    pyautogui.sleep(0.5)
+    pyautogui.press('x')
+
+    pyautogui.sleep(12.62)
+    pyautogui.moveTo(1249, 223, duration=0)
+    pyautogui.click()
+
+    pyautogui.moveTo(679, 692, duration=0)
+    pyautogui.click()
+
+    time.sleep(2)
+    pyautogui.hotkey('alt', 'f4')

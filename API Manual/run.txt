@@ -1,0 +1,3 @@
+open new terminal
+go to the "API MANUAL" folder
+type this in the terminal: "npm run start"

@@ -1,0 +1,30 @@
+from PIL import Image
+import pytesseract
+import cv2
+import pyautogui
+
+def tesseract():
+    path_to_tesseract = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
+    pytesseract.pytesseract.tesseract_cmd = path_to_tesseract
+    custom_config = r'--psm 6 outputbase digits'
+
+    # Capture a screenshot of the entire screen
+    screenshot = pyautogui.screenshot()
+
+    # Define the region to crop (left, top, right, bottom)
+    # Adjust these coordinates to fit the region you want to capture
+    left, top, right, bottom = 455, 143, 561, 177
+
+    # Crop the screenshot to the defined region
+    cropped_screenshot = screenshot.crop((left, top, right, bottom))
+
+    # Save the cropped screenshot as 'cropped_screenshot.png'
+    cropped_screenshot.save('cropped_screenshot.png')
+
+    # Perform OCR on the cropped screenshot
+    text = pytesseract.image_to_string(cropped_screenshot, config=custom_config)
+    print(text[:-1])
+
+tesseract()
+
+

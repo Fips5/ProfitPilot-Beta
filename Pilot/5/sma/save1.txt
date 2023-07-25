@@ -1,0 +1,64 @@
+from BUY import buy
+from CLOSE import close
+import json
+import requests
+from datetime import datetime
+import time
+
+def fetch_tsla_data():
+    response = requests.get('http://localhost:8000/')
+    data = response.json()
+    price = data['prices'][0]
+    timestamp = data['timestamp']
+
+    return price, timestamp
+
+
+def fetch_sma_s():
+    with open(r'C:\Users\David\Desktop\Pilot\5\SMA_S.json') as file:
+        data = json.load(file)
+        sma_s = data['sma_s']
+    return sma_s
+
+def fetch_sma_l():
+    with open(r'C:\Users\David\Desktop\Pilot\20\SMA_L.json') as file:
+        data = json.load(file)
+        sma_l = data['sma_l']
+    return sma_l
+
+def check_sma_intersects(price, sma_s, sma_l):
+    if sma_s == 0 or sma_l == 0:
+        print("Market closed.")
+        return
+    
+    if sma_s > sma_l:
+        current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        print(f"Buy - Timestamp: {current_time}, SMA_S={sma_s}, SMA_L={sma_l}")
+
+    if sma_s < sma_l:
+        current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        print(f"Close - Timestamp: {current_time}, SMA_S={sma_s}, SMA_L={sma_l}")
+
+def save_data_to_json(price, timestamp):
+    data = {
+        'price': price,
+        'timestamp': timestamp
+    }
+    with open('tsla_prices.json', 'a') as file:
+        json.dump(data, file)
+        file.write('\n')
+
+def main():
+    while True:
+        price, timestamp = fetch_tsla_data()
+        save_data_to_json(price, timestamp)
+        
+        sma_s = fetch_sma_s()
+        sma_l = fetch_sma_l()
+        
+        check_sma_intersects(price, sma_s, sma_l)
+        
+        time.sleep(180)  # 20 seconds
+ 
+if __name__ == '__main__':
+    main()
